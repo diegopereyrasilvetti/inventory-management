@@ -9,6 +9,8 @@ const esquemaVenta = z
   .object({
     fecha: z.iso.date().optional(), // AAAA-MM-DD; si falta se usa hoy
     metodo: z.enum(["Efectivo", "Transferencia", "Tarjeta"]),
+    // "Sin IVA discriminado": la venta se registra completa, pero sin separar el IVA (solo Responsable Inscripto)
+    sin_iva: z.boolean().optional(),
     items: z
       .array(
         z
@@ -25,11 +27,13 @@ const esquemaVenta = z
 
 // POST /api/ventas -> registra la venta y descuenta el stock, todo en un solo paso
 ventasRouter.post("/", validar({ body: esquemaVenta }), async (req, res) => {
-  const { fecha, metodo, items } = req.datos.body;
+  const { fecha, metodo, items, sin_iva } = req.datos.body;
   const { data, error } = await req.db.rpc("registrar_venta", {
     p_fecha: fecha ?? null,
     p_metodo: metodo,
     p_items: items,
+    // Solo se envía cuando se pide: así las ventas comunes siguen funcionando aunque la migración 11 no esté aplicada
+    ...(sin_iva ? { p_sin_iva: true } : {}),
   });
   if (error) return responderErrorDB(res, error);
   res.status(201).json({ id: data });

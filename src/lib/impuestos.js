@@ -217,6 +217,54 @@ export function redondear4(n) {
   return (Math.sign(x) * Math.round(Math.abs(x) * 10000 + 1e-7)) / 10000;
 }
 
+/* ------------------------------------------------------------------ */
+/* Compras                                                            */
+/* ------------------------------------------------------------------ */
+
+export const TIPOS_COMPROBANTE = Object.freeze({
+  factura_a: "Factura A",
+  factura_b: "Factura B",
+  factura_c: "Factura C",
+  ticket: "Ticket",
+  sin_comprobante: "Sin comprobante",
+});
+
+/** ¿El comprobante da crédito fiscal de IVA? Solo la Factura A, y solo para un Responsable Inscripto. */
+export function daCreditoFiscal(tipoComprobante, config = CONFIG_FISCAL_DEFECTO) {
+  return tomaCreditoFiscal(config) && tipoComprobante === "factura_a";
+}
+
+/**
+ * Un renglón de compra. Se carga el costo UNITARIO con IVA incluido (lo que se pagó por unidad).
+ *  - alicuota: la del renglón o la del producto; vacía = la general.
+ *  - computaCredito: si el comprobante da crédito fiscal (ver daCreditoFiscal).
+ * Devuelve el total del renglón, su neto, IVA y crédito fiscal, y el costo unitario "comparable"
+ * (sin IVA si el IVA se recupera, con IVA si no) que se usa para el costo promedio ponderado.
+ */
+export function lineaDeCompra({ cantidad, costoUnitarioConIva, alicuota, computaCredito }, config = CONFIG_FISCAL_DEFECTO) {
+  const unitario = redondear4(costoUnitarioConIva);
+  const total = redondear(Number(cantidad) * unitario);
+  const d = ivaDeCompra({ total, alicuota, computaCredito }, config);
+  return {
+    cantidad: Number(cantidad),
+    costoUnitarioConIva: unitario,
+    alicuota: d.alicuota,
+    total,
+    neto: d.neto,
+    iva: d.iva,
+    creditoFiscal: d.creditoComputable,
+    costoUnitario: costoUnitarioComparable({ costoUnitarioConIva: unitario, alicuota, computaCredito }, config),
+  };
+}
+
+/** Estado de pago de una compra: 'anulada' | 'pagada' | 'parcial' | 'a_pagar'. pagado = suma de pagos NO anulados. */
+export function estadoPagoCompra({ total, pagado, estado = "activa" }) {
+  if (estado === "anulada") return "anulada";
+  const saldo = redondear(total - pagado);
+  if (saldo <= 0) return "pagada";
+  return pagado > 0 ? "parcial" : "a_pagar";
+}
+
 /**
  * Costo de las mercaderías vendidas a partir de los renglones de las ventas.
  * Cada renglón tiene { cantidad, costoUnitario } con el costo guardado al momento de la venta.

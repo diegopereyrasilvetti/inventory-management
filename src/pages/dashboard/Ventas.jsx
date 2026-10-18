@@ -27,7 +27,7 @@ function claseMensaje(aviso) {
 }
 
 export default function Ventas() {
-  const { ventas, gastos, agregarVenta, agregarGasto, eliminarVenta, eliminarGasto } = useFinanzas();
+  const { ventas, gastos, agregarVenta, agregarGasto, eliminarVenta, eliminarGasto, sinIvaDisponible } = useFinanzas();
   const { catalogo, costosDisponibles } = useCatalogo();
   const { config } = useConfiguracionFiscal();
 
@@ -36,6 +36,7 @@ export default function Ventas() {
   const [cantidad, setCantidad] = useState("1");
   const [carrito, setCarrito] = useState([]);
   const [metodo, setMetodo] = useState("Efectivo");
+  const [sinIva, setSinIva] = useState(false); // venta sin discriminar el IVA (solo Responsable Inscripto)
   const [avisoVenta, avisarVenta] = useAviso();
 
   const [categoria, setCategoria] = useState(CATEGORIAS_GASTO[0]);
@@ -54,7 +55,7 @@ export default function Ventas() {
   // Desglose de referencia (el definitivo lo calcula la base al registrar, con las mismas reglas, renglón por renglón)
   const desgloseCarrito = carrito.reduce(
     (suma, it) => {
-      const d = ivaDeVenta({ total: it.precio * it.cantidad, alicuota: it.alicuotaIva }, config);
+      const d = ivaDeVenta({ total: it.precio * it.cantidad, alicuota: sinIva ? 0 : it.alicuotaIva }, config);
       return { neto: suma.neto + d.neto, iva: suma.iva + d.iva };
     },
     { neto: 0, iva: 0 },
@@ -99,9 +100,11 @@ export default function Ventas() {
       items: carrito.map((it) => ({ ...it })),
       metodo,
       total: totalCarrito,
+      sinIva: sinIva && discriminaIva(config) && sinIvaDisponible,
     };
     if (!(await agregarVenta(venta))) return; // si falló, el cartel de error ya avisó y el carrito se conserva
     setCarrito([]);
+    setSinIva(false); // cada venta empieza con el IVA discriminado, para no dejarlo activado por descuido
     avisarVenta("Venta registrada: " + MONEDA.format(venta.total) + " (" + metodo + ").", true);
   }
 
@@ -241,6 +244,23 @@ export default function Ventas() {
             )}
           </div>
 
+          {discriminaIva(config) && sinIvaDisponible && (
+            <div className="flex flex-col gap-1">
+              <label className="flex cursor-pointer items-start gap-2 text-sm text-(--texto)">
+                <input id="vta-sin-iva" className="mt-0.5 size-4 accent-(--viz-azul)" type="checkbox" checked={sinIva} onChange={(e) => setSinIva(e.target.checked)} />
+                <span>
+                  <strong>Sin IVA discriminado</strong>
+                  <span className="text-(--texto-suave)"> — no separar el IVA en esta venta</span>
+                </span>
+              </label>
+              {sinIva && (
+                <p id="vta-aviso-sin-iva" className="pl-6 text-xs text-(--texto-suave)" role="status">
+                  La venta cuenta completa en tus ingresos y en tu ganancia; solo no se separa el IVA. Quedará marcada como "Sin IVA discriminado".
+                </p>
+              )}
+            </div>
+          )}
+
           <fieldset className="flex flex-col gap-1.5">
             <legend className="text-sm font-semibold text-(--texto)">Método de pago</legend>
             <div className="mt-1 flex flex-wrap gap-x-5 gap-y-2">
@@ -267,7 +287,7 @@ export default function Ventas() {
 
           {carrito.length > 0 && discriminaIva(config) && (
             <p id="vta-desglose" className="-mt-2 text-right text-xs text-(--texto-suave)">
-              {"Neto " + MONEDA.format(redondear(desgloseCarrito.neto)) + " · IVA incluido " + MONEDA.format(redondear(desgloseCarrito.iva))}
+              {sinIva ? "Total " + MONEDA.format(redondear(desgloseCarrito.neto)) + " · sin IVA discriminado" : "Neto " + MONEDA.format(redondear(desgloseCarrito.neto)) + " · IVA incluido " + MONEDA.format(redondear(desgloseCarrito.iva))}
             </p>
           )}
           {sinCostoCarrito.length > 0 && (
@@ -367,6 +387,9 @@ export default function Ventas() {
                   <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-(--texto-suave)">
                     <span>{v.hora + " h"}</span>
                     <span className="rounded-full bg-(--fondo) px-2 py-0.5 font-medium ring-1 ring-(--borde)">{v.metodo}</span>
+                    {v.sinIva && (
+                      <span className="rounded-full bg-(--viz-gris-fondo) px-2 py-0.5 font-medium text-(--viz-gris-texto)" data-sin-iva-etiqueta>Sin IVA discriminado</span>
+                    )}
                     {v.neto !== null && v.iva > 0 && <span data-desglose>{"Neto " + MONEDA.format(v.neto) + " · IVA " + MONEDA.format(v.iva)}</span>}
                     {v.costo && !v.costo.completo && (
                       <span className="rounded-full bg-(--viz-naranja-fondo) px-2 py-0.5 font-medium text-(--viz-naranja-texto)" title="Algún producto no tenía costo cargado al vender">Costo pendiente</span>

@@ -13,6 +13,7 @@ import Inventario from "./pages/dashboard/Inventario.jsx";
 import Productos from "./pages/dashboard/Productos.jsx";
 import Documentacion from "./pages/dashboard/Documentacion.jsx";
 import Proveedores from "./pages/dashboard/Proveedores.jsx";
+import Compras from "./pages/dashboard/Compras.jsx";
 import Ventas from "./pages/dashboard/Ventas.jsx";
 import Balances from "./pages/dashboard/Balances.jsx";
 import Perfil from "./pages/dashboard/Perfil.jsx";
@@ -38,6 +39,7 @@ export default function App() {
             <Route path="productos" element={<Productos />} />
             <Route path="documentacion" element={<Documentacion />} />
             <Route path="proveedores" element={<Proveedores />} />
+            <Route path="compras" element={<Compras />} />
             <Route path="ventas" element={<Ventas />} />
             <Route path="balances" element={<Balances />} />
             <Route path="perfil" element={<Perfil />} />

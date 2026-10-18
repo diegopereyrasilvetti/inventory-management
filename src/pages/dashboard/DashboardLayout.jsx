@@ -14,6 +14,7 @@ const SECCIONES = [
   { ruta: "/dashboard/productos", texto: "Productos", icono: "fa-tag" },
   { ruta: "/dashboard/documentacion", texto: "Documentación", icono: "fa-file-lines" },
   { ruta: "/dashboard/proveedores", texto: "Proveedores", icono: "fa-truck" },
+  { ruta: "/dashboard/compras", texto: "Compras", icono: "fa-file-invoice-dollar" },
   { ruta: "/dashboard/ventas", texto: "Ventas", icono: "fa-cart-shopping" },
   { ruta: "/dashboard/balances", texto: "Balances", icono: "fa-scale-balanced" },
 ];
@@ -114,7 +115,8 @@ export default function DashboardLayout() {
                 end={s.fin}
                 className={claseEnlaceNav("flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition")}
               >
-                <i className={"fa-solid " + s.icono}></i> {s.texto}
+                {/* Con 8 secciones, en pantallas de 1280 a 1535 px los iconos no entran junto al nombre de usuario */}
+                <i className={"fa-solid hidden 2xl:inline " + s.icono}></i> {s.texto}
               </NavLink>
             ))}
           </nav>
@@ -124,7 +126,7 @@ export default function DashboardLayout() {
           </div>
 
           <div className="flex items-center justify-self-end gap-1 sm:gap-2 xl:justify-self-auto">
-            <form className="relative hidden 2xl:block" role="search" onSubmit={(e) => e.preventDefault()}>
+            <form className="relative hidden min-[1700px]:block" role="search" onSubmit={(e) => e.preventDefault()}>
               <i className="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-(--texto-suave)"></i>
               <input className={"w-52 pl-8 pr-3 py-2 " + CLASE_BUSCADOR} type="search" name="buscar" placeholder="Buscar producto…" aria-label="Buscar producto" />
             </form>

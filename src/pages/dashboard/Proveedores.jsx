@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import SeccionDashboard from "../../components/SeccionDashboard.jsx";
+import { useCompras } from "../../store/compras.js";
 import { useProveedores } from "../../store/proveedores.js";
+import { MONEDA } from "../../store/finanzas.js";
 
 const FORM_VACIO = { nombre: "", rubro: "", contacto: "", telefono: "", email: "", estado: "activo" };
 const CLASE_INPUT =
@@ -45,6 +47,7 @@ function ProveedoresDato({ etiqueta, valor, enlace, textoEnlace, icono }) {
 
 export default function Proveedores() {
   const { proveedores, cargando, agregar, actualizar, eliminar } = useProveedores();
+  const { deudaPorProveedor } = useCompras(); // lo que se le debe a cada proveedor por compras a pagar
   const [busqueda, setBusqueda] = useState("");
   const [form, setForm] = useState(FORM_VACIO);
   const [idEditado, setIdEditado] = useState(null);
@@ -200,6 +203,9 @@ export default function Proveedores() {
                 <div className="min-w-0">
                   <p className="break-words text-sm font-semibold text-(--texto)">{p.nombre}</p>
                   <p className="break-words text-xs text-(--texto-suave)">{p.rubro || "Sin rubro"}</p>
+                  {deudaPorProveedor.get(p.id) > 0 && (
+                    <p className="text-xs font-semibold text-(--viz-naranja-texto)" data-deuda>{"Deuda: " + MONEDA.format(deudaPorProveedor.get(p.id))}</p>
+                  )}
                 </div>
 
                 <span className="col-start-2 row-start-1 flex justify-self-end gap-1 sm:col-start-4">

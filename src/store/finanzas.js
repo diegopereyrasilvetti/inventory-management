@@ -41,15 +41,25 @@ function hora(creada) {
 const VENTA_BASE = "id,fecha,metodo,total,created_at";
 const ITEM_BASE = "id,producto_id,sku,nombre,precio,cantidad";
 
+// De más completo a más básico: si todavía no se ejecutaron las migraciones 11 / 09, se pide como antes
+const SELECTS_VENTAS = [
+  VENTA_BASE + ",condicion_fiscal,neto,iva,sin_iva,venta_items(" + ITEM_BASE + ",alicuota_iva,neto,iva,costo_unitario)",
+  VENTA_BASE + ",condicion_fiscal,neto,iva,venta_items(" + ITEM_BASE + ",alicuota_iva,neto,iva,costo_unitario)",
+  VENTA_BASE + ",venta_items(" + ITEM_BASE + ")",
+];
+
+// ¿La base ya tiene la columna sin_iva (migración 11)? Sin ella, la pantalla no ofrece el tilde
+let sinIvaDisponible = false;
+
 async function pedirVentas() {
-  // Con el desglose de IVA y el costo histórico (09_ventas_desglose.sql). Si todavía no se ejecutó, se pide como antes.
-  const nuevo = await db()
-    .from("ventas")
-    .select(VENTA_BASE + ",condicion_fiscal,neto,iva,venta_items(" + ITEM_BASE + ",alicuota_iva,neto,iva,costo_unitario)")
-    .order("created_at");
-  if (!nuevo.error) return nuevo.data;
-  if (nuevo.error.code !== "42703") throw nuevo.error; // 42703 = columna inexistente
-  return ok(await db().from("ventas").select(VENTA_BASE + ",venta_items(" + ITEM_BASE + ")").order("created_at"));
+  for (let i = 0; i < SELECTS_VENTAS.length; i++) {
+    const r = await db().from("ventas").select(SELECTS_VENTAS[i]).order("created_at");
+    if (!r.error) {
+      sinIvaDisponible = i === 0;
+      return r.data;
+    }
+    if (r.error.code !== "42703" || i === SELECTS_VENTAS.length - 1) throw r.error; // 42703 = columna inexistente
+  }
 }
 
 const aNumero = (x) => (x === null || x === undefined ? null : Number(x));
@@ -97,6 +107,7 @@ export function useFinanzas() {
           condicionFiscal: v.condicion_fiscal ?? null,
           neto: aNumero(v.neto),
           iva: aNumero(v.iva),
+          sinIva: v.sin_iva === true, // se registró sin discriminar el IVA (la venta cuenta completa en los totales)
           items,
           costo: conDesglose ? costoDeVentas(items) : null,
         };
@@ -130,7 +141,9 @@ export function useFinanzas() {
       }
       items.push({ producto_id: p.id, cantidad: it.cantidad });
     }
-    const exito = await guardar(() => api("POST", "/ventas", { fecha: venta.fecha, metodo: venta.metodo, items }));
+    const exito = await guardar(() =>
+      api("POST", "/ventas", { fecha: venta.fecha, metodo: venta.metodo, items, ...(venta.sinIva ? { sin_iva: true } : {}) }),
+    );
     invalidar(CLAVE_VENTAS, CLAVE_PRODUCTOS);
     return exito;
   }
@@ -163,6 +176,7 @@ export function useFinanzas() {
     ventas,
     gastos,
     cargando: cargandoVentas || cargandoGastos,
+    sinIvaDisponible,
     agregarVenta,
     agregarGasto,
     eliminarVenta,

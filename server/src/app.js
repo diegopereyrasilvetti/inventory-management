@@ -5,6 +5,7 @@ import helmet from "helmet";
 import { config, supabaseConfigurado } from "./config.js";
 import { requiereUsuario } from "./middleware/auth.js";
 import { requiereAdmin } from "./middleware/admin.js";
+import { comprasRouter } from "./routes/compras.js";
 import { productosRouter } from "./routes/productos.js";
 import { usuariosRouter } from "./routes/usuarios.js";
 import { ventasRouter } from "./routes/ventas.js";
@@ -61,6 +62,7 @@ app.get("/api/me", requiereUsuario, (req, res) => {
 
 // Operaciones de stock (todas exigen iniciar sesión)
 app.use("/api/ventas", requiereUsuario, ventasRouter);
+app.use("/api/compras", requiereUsuario, comprasRouter);
 app.use("/api/productos", requiereUsuario, productosRouter);
 
 // Administración de personas: solo para administradores

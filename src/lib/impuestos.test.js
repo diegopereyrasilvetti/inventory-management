@@ -10,6 +10,9 @@ import {
   costoUnitarioComparable,
   costoPromedioPonderado,
   costosDeProducto,
+  lineaDeCompra,
+  estadoPagoCompra,
+  daCreditoFiscal,
   costoDeVentas,
   impuestoChequeMovimiento,
   impuestoCheque,
@@ -152,4 +155,38 @@ test("costos de producto: lo cargado y el costo comparable", () => {
   for (const vacio of ["", null, undefined, "abc", -5]) {
     assert.deepEqual(costosDeProducto({ costoConIva: vacio, alicuota: 21 }, RI), { costoConIva: null, costo: null });
   }
+});
+
+test("línea de compra: Factura A de un Responsable Inscripto da crédito fiscal", () => {
+  const l = lineaDeCompra({ cantidad: 10, costoUnitarioConIva: 1331, alicuota: 21, computaCredito: true }, RI);
+  assert.deepEqual(l, { cantidad: 10, costoUnitarioConIva: 1331, alicuota: 21, total: 13310, neto: 11000, iva: 2310, creditoFiscal: 2310, costoUnitario: 1100 });
+});
+
+test("línea de compra: sin crédito el IVA es parte del costo", () => {
+  const sinFacturaA = lineaDeCompra({ cantidad: 10, costoUnitarioConIva: 1331, alicuota: 21, computaCredito: false }, RI);
+  assert.equal(sinFacturaA.creditoFiscal, 0);
+  assert.equal(sinFacturaA.costoUnitario, 1331);
+  assert.equal(sinFacturaA.neto, 11000); // el neto se informa igual, pero no se recupera
+  const mono = lineaDeCompra({ cantidad: 10, costoUnitarioConIva: 1331, alicuota: 21, computaCredito: true }, MONO);
+  assert.equal(mono.creditoFiscal, 0);
+  assert.equal(mono.costoUnitario, 1331);
+  assert.equal(mono.alicuota, 0); // no discrimina IVA
+  const exentoProducto = lineaDeCompra({ cantidad: 2, costoUnitarioConIva: 500, alicuota: 0, computaCredito: true }, RI);
+  assert.deepEqual([exentoProducto.iva, exentoProducto.creditoFiscal, exentoProducto.costoUnitario], [0, 0, 500]);
+  assert.equal(lineaDeCompra({ cantidad: 1, costoUnitarioConIva: 121, computaCredito: true }, RI).iva, 21); // sin alícuota: la general
+});
+
+test("el crédito fiscal solo existe con Factura A y condición Responsable Inscripto", () => {
+  assert.equal(daCreditoFiscal("factura_a", RI), true);
+  for (const tipo of ["factura_b", "factura_c", "ticket", "sin_comprobante"]) assert.equal(daCreditoFiscal(tipo, RI), false);
+  assert.equal(daCreditoFiscal("factura_a", MONO), false);
+  assert.equal(daCreditoFiscal("factura_a", EXENTO), false);
+});
+
+test("estado de pago de una compra", () => {
+  assert.equal(estadoPagoCompra({ total: 1000, pagado: 0 }), "a_pagar");
+  assert.equal(estadoPagoCompra({ total: 1000, pagado: 400 }), "parcial");
+  assert.equal(estadoPagoCompra({ total: 1000, pagado: 1000 }), "pagada");
+  assert.equal(estadoPagoCompra({ total: 0, pagado: 0 }), "pagada");
+  assert.equal(estadoPagoCompra({ total: 1000, pagado: 400, estado: "anulada" }), "anulada");
 });
