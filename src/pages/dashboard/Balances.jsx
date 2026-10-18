@@ -2,8 +2,10 @@ import { useMemo, useState } from "react";
 import SeccionDashboard from "../../components/SeccionDashboard.jsx";
 import { useFinanzas, MONEDA, CATEGORIAS_GASTO, iso } from "../../store/finanzas.js";
 import useAviso from "../../hooks/useAviso.js";
+import { balancePorPeriodos } from "../../lib/balances.js";
+import { useCompras } from "../../store/compras.js";
+import { useConfiguracionFiscal } from "../../store/configuracionFiscal.js";
 
-const CATEGORIA_COSTO = "Mercadería y proveedores";
 const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 const DIAS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
 const COLOR_INGRESOS = "bg-(--viz-violeta)";
@@ -21,25 +23,7 @@ function compacto(n) {
   return "$" + Math.round(n);
 }
 
-function dia(mapa, fecha) {
-  if (!mapa[fecha]) mapa[fecha] = { ing: 0, costo: 0, otros: 0 };
-  return mapa[fecha];
-}
-
-/* ---------- Datos ---------- */
-function datosReales(ventas, gastos) {
-  const mapa = {};
-  ventas.forEach((v) => {
-    dia(mapa, v.fecha).ing += v.total;
-  });
-  gastos.forEach((g) => {
-    const d = dia(mapa, g.fecha);
-    if (g.categoria === CATEGORIA_COSTO) d.costo += g.monto;
-    else d.otros += g.monto;
-  });
-  return mapa;
-}
-
+/* ---------- Datos de ejemplo (solo cuando no hay datos reales, o si se piden a propósito) ---------- */
 let cacheEjemplo = null;
 function datosEjemplo() {
   const hoy = new Date();
@@ -221,6 +205,8 @@ function BalancesGrafico({ lista }) {
 
 export default function Balances() {
   const { ventas, gastos, cargando, agregarGasto } = useFinanzas();
+  const { compras, cargando: cargandoCompras } = useCompras();
+  const { config, cargando: cargandoConfig } = useConfiguracionFiscal();
 
   const [periodo, setPeriodo] = useState("6m");
   const [forzarEjemplo, setForzarEjemplo] = useState(null); // null = automático: ejemplo si todavía no hay datos propios
@@ -231,24 +217,30 @@ export default function Balances() {
   const [fecha, setFecha] = useState(() => iso());
   const [aviso, avisar] = useAviso();
 
-  const real = useMemo(() => datosReales(ventas, gastos), [ventas, gastos]);
-  const ejemplo = forzarEjemplo !== null ? forzarEjemplo : !cargando && Object.keys(real).length === 0;
+  const hayDatos = ventas.length > 0 || gastos.length > 0 || compras.length > 0;
+  const ejemplo = forzarEjemplo !== null ? forzarEjemplo : !(cargando || cargandoCompras || cargandoConfig) && !hayDatos;
 
-  const { lista, totales } = useMemo(() => {
-    const l = sumar(periodos(periodo), ejemplo ? datosEjemplo() : real);
-    const t = l.reduce(
-      (acc, p) => {
-        acc.ing += p.ing;
-        acc.costo += p.costo;
-        acc.otros += p.otros;
-        return acc;
-      },
-      { ing: 0, costo: 0, otros: 0 },
-    );
-    t.egr = t.costo + t.otros;
-    t.gan = t.ing - t.egr;
-    return { lista: l, totales: t };
-  }, [periodo, ejemplo, real]);
+  // Con datos reales, las cuentas las hace lib/balances.js (IVA, costo histórico, crédito fiscal, fecha de inicio).
+  // El ejemplo conserva su propio cálculo y nunca se mezcla con lo real.
+  const { lista, totales, legado } = useMemo(() => {
+    if (ejemplo) {
+      const l = sumar(periodos(periodo), datosEjemplo());
+      const t = l.reduce(
+        (acc, p) => {
+          acc.ing += p.ing;
+          acc.costo += p.costo;
+          acc.otros += p.otros;
+          return acc;
+        },
+        { ing: 0, costo: 0, otros: 0 },
+      );
+      t.egr = t.costo + t.otros;
+      t.gan = t.ing - t.egr;
+      return { lista: l, totales: { ...t, tipo: "ejemplo" }, legado: null };
+    }
+    return balancePorPeriodos({ ventas, compras, gastos, config, periodos: periodos(periodo) });
+  }, [periodo, ejemplo, ventas, compras, gastos, config]);
+  const nueva = totales.tipo === "nueva" ? totales.resumen : null;
 
   const margen = totales.ing > 0 ? (totales.gan / totales.ing) * 100 : null;
   const ancho = margen === null ? 0 : Math.max(0, Math.min(100, margen));
@@ -304,7 +296,7 @@ export default function Balances() {
         <p id="bal-aviso-texto">
           {ejemplo
             ? "Estás viendo datos de ejemplo. Registrá ventas y gastos para ver tus propios números."
-            : "Estás viendo tus ventas y gastos registrados."}
+            : "Estás viendo tus ventas, compras y gastos registrados."}
         </p>
         <button
           id="bal-modo"
@@ -318,7 +310,7 @@ export default function Balances() {
 
       <dl className="grid grid-cols-2 gap-2 px-5 pt-4 sm:gap-4 sm:px-6 lg:grid-cols-4">
         <div className="rounded-xl border border-(--borde) bg-(--fondo) p-3 sm:p-4">
-          <dt className="flex items-center gap-2 text-xs font-medium text-(--texto-suave) sm:text-sm"><i className="fa-solid fa-arrow-trend-up text-(--viz-violeta)" aria-hidden="true" /> Ingresos</dt>
+          <dt className="flex items-center gap-2 text-xs font-medium text-(--texto-suave) sm:text-sm"><i className="fa-solid fa-arrow-trend-up text-(--viz-violeta)" aria-hidden="true" /> {nueva ? "Ingresos sin IVA" : "Ingresos"}</dt>
           <dd id="bal-ingresos" className="mt-1.5 text-xl font-bold text-(--texto) sm:text-2xl">{MONEDA.format(totales.ing)}</dd>
         </div>
         <div className="rounded-xl border border-(--borde) bg-(--fondo) p-3 sm:p-4">
@@ -334,6 +326,53 @@ export default function Balances() {
           <dd id="bal-ganancia" className={"mt-1.5 text-xl font-bold sm:text-2xl " + colorGanancia(totales.gan)}>{MONEDA.format(totales.gan)}</dd>
         </div>
       </dl>
+
+      {!ejemplo && hayDatos && (
+        <div id="bal-notas" className="mx-5 mt-3 flex flex-col gap-1.5 rounded-lg border border-(--borde) bg-(--fondo) px-4 py-3 text-sm text-(--texto-suave) sm:mx-6">
+          {nueva && (
+            <p id="bal-fiscal" className="text-(--texto)">
+              {config.condicionFiscal === "responsable_inscripto"
+                ? "Facturado " + MONEDA.format(nueva.totalFacturado) + " · IVA incluido " + MONEDA.format(nueva.ivaVentas) + " · Ingresos sin IVA " + MONEDA.format(nueva.ingresosSinIva)
+                : "Facturado " + MONEDA.format(nueva.totalFacturado) + " (con tu condición fiscal el IVA no se discrimina: todo es ingreso)"}
+            </p>
+          )}
+          {nueva?.incompleto.costo && (
+            <p id="bal-aviso-costo" className="text-(--viz-naranja-texto)">
+              <i className="fa-solid fa-triangle-exclamation mr-1.5" aria-hidden="true" />
+              Falta el costo de {nueva.unidadesSinCosto} {nueva.unidadesSinCosto === 1 ? "unidad vendida" : "unidades vendidas"}: la ganancia está <strong>incompleta</strong> (no se toma como costo cero). Cargalo en Productos.
+            </p>
+          )}
+          {nueva?.incompleto.iva && (
+            <p id="bal-aviso-iva" className="text-(--viz-naranja-texto)">
+              <i className="fa-solid fa-triangle-exclamation mr-1.5" aria-hidden="true" />
+              Hay {nueva.ventasSinDesglose.cantidad} {nueva.ventasSinDesglose.cantidad === 1 ? "venta" : "ventas"} sin desglose de IVA ({MONEDA.format(nueva.ventasSinDesglose.total)}): se cuentan completas, sin estimar su IVA.
+            </p>
+          )}
+          {nueva && nueva.gastosMercaderia > 0 && (
+            <p id="bal-aviso-mercaderia">
+              Cargaste {MONEDA.format(nueva.gastosMercaderia)} como gasto de "Mercadería y proveedores". La mercadería se registra en Compras: revisá que no esté duplicada.
+            </p>
+          )}
+          {nueva && nueva.ventasSinIva.cantidad > 0 && (
+            <p id="bal-sin-iva">
+              {nueva.ventasSinIva.cantidad} {nueva.ventasSinIva.cantidad === 1 ? "venta" : "ventas"} sin IVA discriminado ({MONEDA.format(nueva.ventasSinIva.total)}): cuentan completas en tus ingresos.
+            </p>
+          )}
+          {legado && (
+            <p id="bal-legado">
+              Antes de la nueva contabilidad (cálculo anterior, con IVA incluido y sin costo histórico): ingresos {MONEDA.format(legado.ingresos)}, ganancia {MONEDA.format(legado.ganancia)}. No se suma a los totales de arriba.
+            </p>
+          )}
+          {totales.tipo === "anterior" && (
+            <p id="bal-aviso-anterior">
+              {config.fechaInicioContabilidad
+                ? "Este período es anterior a la nueva contabilidad (desde el " + config.fechaInicioContabilidad.split("-").reverse().join("/") + "): se calcula como antes, sin desglose de IVA ni costo histórico."
+                : "La nueva contabilidad todavía no está activa: se calcula como antes, sin desglose de IVA. Se activa en Configuración fiscal."}
+            </p>
+          )}
+          <p id="bal-estimacion">Son estimaciones para la gestión interna del negocio, no una liquidación fiscal oficial. Confirmá los valores con tu contador.</p>
+        </div>
+      )}
 
       <div className="px-5 pt-6 sm:px-6">
         <h3 className="text-lg font-bold text-(--texto)">Evolución de ingresos y gastos</h3>
@@ -396,7 +435,7 @@ export default function Balances() {
             </tbody>
             <tfoot>
               <tr className="border-t-2 border-(--borde) font-bold text-(--texto)">
-                <th className="py-3 pr-3" scope="row">Total</th>
+                <th className="py-3 pr-3" scope="row">{legado ? "Total desde la nueva contabilidad" : "Total"}</th>
                 <td id="bal-t-ing" className="py-3 pr-3 text-right">{MONEDA.format(totales.ing)}</td>
                 <td id="bal-t-egr" className="py-3 pr-3 text-right">{MONEDA.format(totales.egr)}</td>
                 <td id="bal-t-gan" className={"py-3 text-right " + colorGanancia(totales.gan)}>{MONEDA.format(totales.gan)}</td>

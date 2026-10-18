@@ -11,7 +11,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test src/lib/impuestos.test.js"
+    "test": "node --test src/lib/impuestos.test.js src/lib/balances.test.js"
   },
   "repository": {
     "type": "git",
