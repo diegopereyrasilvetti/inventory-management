@@ -16,6 +16,7 @@ import Proveedores from "./pages/dashboard/Proveedores.jsx";
 import Ventas from "./pages/dashboard/Ventas.jsx";
 import Balances from "./pages/dashboard/Balances.jsx";
 import Perfil from "./pages/dashboard/Perfil.jsx";
+import ConfiguracionFiscal from "./pages/dashboard/ConfiguracionFiscal.jsx";
 import AvisoConfiguracion from "./components/AvisoConfiguracion.jsx";
 import AvisoErrores from "./components/AvisoErrores.jsx";
 
@@ -40,6 +41,7 @@ export default function App() {
             <Route path="ventas" element={<Ventas />} />
             <Route path="balances" element={<Balances />} />
             <Route path="perfil" element={<Perfil />} />
+            <Route path="configuracion" element={<ConfiguracionFiscal />} />
             <Route element={<RutaAdmin />}>
               <Route path="usuarios" element={<Usuarios />} />
             </Route>

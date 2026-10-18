@@ -4,6 +4,7 @@ import { db, guardar, nulo, ok } from "./db.js";
 import { invalidar, useConsulta } from "./consultas.js";
 import { avisarError } from "./avisos.js";
 import { CLAVE_PRODUCTOS, useProductosDB } from "./productos.js";
+import { costoDeVentas } from "../lib/impuestos.js";
 
 const CLAVE_VENTAS = "ventas";
 const CLAVE_GASTOS = "gastos";
@@ -37,14 +38,21 @@ function hora(creada) {
   return new Date(creada).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
+const VENTA_BASE = "id,fecha,metodo,total,created_at";
+const ITEM_BASE = "id,producto_id,sku,nombre,precio,cantidad";
+
 async function pedirVentas() {
-  return ok(
-    await db()
-      .from("ventas")
-      .select("id,fecha,metodo,total,created_at,venta_items(id,producto_id,sku,nombre,precio,cantidad)")
-      .order("created_at"),
-  );
+  // Con el desglose de IVA y el costo histórico (09_ventas_desglose.sql). Si todavía no se ejecutó, se pide como antes.
+  const nuevo = await db()
+    .from("ventas")
+    .select(VENTA_BASE + ",condicion_fiscal,neto,iva,venta_items(" + ITEM_BASE + ",alicuota_iva,neto,iva,costo_unitario)")
+    .order("created_at");
+  if (!nuevo.error) return nuevo.data;
+  if (nuevo.error.code !== "42703") throw nuevo.error; // 42703 = columna inexistente
+  return ok(await db().from("ventas").select(VENTA_BASE + ",venta_items(" + ITEM_BASE + ")").order("created_at"));
 }
+
+const aNumero = (x) => (x === null || x === undefined ? null : Number(x));
 
 async function pedirGastos() {
   return ok(await db().from("gastos").select("id,fecha,categoria,detalle,monto").order("id"));
@@ -52,7 +60,10 @@ async function pedirGastos() {
 
 /**
  * Ventas y gastos.
- * ventas: [{ id, fecha: 'AAAA-MM-DD', hora: 'HH:mm', items: [{ sku, nombre, precio, cantidad }], metodo, total }]
+ * ventas: [{ id, fecha: 'AAAA-MM-DD', hora: 'HH:mm', items: [{ sku, nombre, precio, cantidad, ... }], metodo, total, ... }]
+ *   Desglose (null en las ventas anteriores a la fase de impuestos): condicionFiscal, neto, iva; cada ítem: alicuotaIva, neto, iva, costoUnitario
+ *   (el costo del producto al momento de vender; null = se desconocía, nunca se toma como 0).
+ *   costo: { total, completo, unidadesSinCosto } del costo de lo vendido, o null si la venta no tiene desglose.
  * gastos: [{ id, fecha, categoria, detalle, monto }]
  * Los guardados devuelven true/false. Una venta descuenta el stock de cada producto y lo anota en movimientos_stock;
  * al eliminarla, el stock se devuelve.
@@ -64,20 +75,32 @@ export function useFinanzas() {
 
   const ventas = useMemo(
     () =>
-      filasVentas.map((v) => ({
-        id: v.id,
-        fecha: v.fecha,
-        hora: hora(v.created_at),
-        metodo: v.metodo,
-        total: Number(v.total),
-        items: (v.venta_items || []).map((it) => ({
+      filasVentas.map((v) => {
+        const items = (v.venta_items || []).map((it) => ({
           sku: it.sku,
           nombre: it.nombre,
           precio: Number(it.precio),
           cantidad: it.cantidad,
           productoId: it.producto_id,
-        })),
-      })),
+          alicuotaIva: aNumero(it.alicuota_iva),
+          neto: aNumero(it.neto),
+          iva: aNumero(it.iva),
+          costoUnitario: aNumero(it.costo_unitario),
+        }));
+        const conDesglose = aNumero(v.neto) !== null;
+        return {
+          id: v.id,
+          fecha: v.fecha,
+          hora: hora(v.created_at),
+          metodo: v.metodo,
+          total: Number(v.total),
+          condicionFiscal: v.condicion_fiscal ?? null,
+          neto: aNumero(v.neto),
+          iva: aNumero(v.iva),
+          items,
+          costo: conDesglose ? costoDeVentas(items) : null,
+        };
+      }),
     [filasVentas],
   );
 

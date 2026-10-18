@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import SeccionDashboard from "../../components/SeccionDashboard.jsx";
+import { discriminaIva, ivaDeVenta, redondear } from "../../lib/impuestos.js";
 import { useCatalogo } from "../../store/catalogo.js";
+import { useConfiguracionFiscal } from "../../store/configuracionFiscal.js";
 import { useFinanzas, MONEDA, CATEGORIAS_GASTO, iso } from "../../store/finanzas.js";
 import useAviso from "../../hooks/useAviso.js";
 
@@ -26,7 +28,8 @@ function claseMensaje(aviso) {
 
 export default function Ventas() {
   const { ventas, gastos, agregarVenta, agregarGasto, eliminarVenta, eliminarGasto } = useFinanzas();
-  const { catalogo } = useCatalogo();
+  const { catalogo, costosDisponibles } = useCatalogo();
+  const { config } = useConfiguracionFiscal();
 
   const [fecha, setFecha] = useState(() => iso());
   const [sku, setSku] = useState("");
@@ -48,6 +51,15 @@ export default function Ventas() {
   const skuActual = productos.some((p) => p.sku === sku) ? sku : (productos[0]?.sku ?? "");
 
   const totalCarrito = carrito.reduce((suma, it) => suma + it.precio * it.cantidad, 0);
+  // Desglose de referencia (el definitivo lo calcula la base al registrar, con las mismas reglas, renglón por renglón)
+  const desgloseCarrito = carrito.reduce(
+    (suma, it) => {
+      const d = ivaDeVenta({ total: it.precio * it.cantidad, alicuota: it.alicuotaIva }, config);
+      return { neto: suma.neto + d.neto, iva: suma.iva + d.iva };
+    },
+    { neto: 0, iva: 0 },
+  );
+  const sinCostoCarrito = costosDisponibles ? carrito.filter((it) => it.sinCosto) : [];
 
   const dia = fecha || iso();
   const deDia = ventas.filter((v) => v.fecha === dia);
@@ -70,7 +82,10 @@ export default function Ventas() {
       if (actual.some((it) => it.sku === skuActual)) {
         return actual.map((it) => (it.sku === skuActual ? { ...it, cantidad: it.cantidad + cant } : it));
       }
-      return [...actual, { sku: producto.sku, nombre: producto.nombre, precio: producto.precio, cantidad: cant }];
+      return [
+        ...actual,
+        { sku: producto.sku, nombre: producto.nombre, precio: producto.precio, cantidad: cant, alicuotaIva: producto.alicuotaIva, sinCosto: producto.costoConIva === null },
+      ];
     });
     setCantidad("1");
   }
@@ -250,6 +265,18 @@ export default function Ventas() {
             <span id="vta-total" className="text-2xl font-bold text-(--texto)">{MONEDA.format(totalCarrito)}</span>
           </div>
 
+          {carrito.length > 0 && discriminaIva(config) && (
+            <p id="vta-desglose" className="-mt-2 text-right text-xs text-(--texto-suave)">
+              {"Neto " + MONEDA.format(redondear(desgloseCarrito.neto)) + " · IVA incluido " + MONEDA.format(redondear(desgloseCarrito.iva))}
+            </p>
+          )}
+          {sinCostoCarrito.length > 0 && (
+            <p id="vta-aviso-costo" className="text-xs text-(--viz-naranja-texto)" role="status">
+              <i className="fa-solid fa-triangle-exclamation mr-1" />
+              {sinCostoCarrito.length === 1 ? "Un producto de esta venta no tiene" : sinCostoCarrito.length + " productos de esta venta no tienen"} costo cargado: la ganancia de esta venta quedará incompleta.
+            </p>
+          )}
+
           <p id="vta-mensaje" className={claseMensaje(avisoVenta)} role="status">{avisoVenta?.texto}</p>
 
           <button
@@ -340,6 +367,10 @@ export default function Ventas() {
                   <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-(--texto-suave)">
                     <span>{v.hora + " h"}</span>
                     <span className="rounded-full bg-(--fondo) px-2 py-0.5 font-medium ring-1 ring-(--borde)">{v.metodo}</span>
+                    {v.neto !== null && v.iva > 0 && <span data-desglose>{"Neto " + MONEDA.format(v.neto) + " · IVA " + MONEDA.format(v.iva)}</span>}
+                    {v.costo && !v.costo.completo && (
+                      <span className="rounded-full bg-(--viz-naranja-fondo) px-2 py-0.5 font-medium text-(--viz-naranja-texto)" title="Algún producto no tenía costo cargado al vender">Costo pendiente</span>
+                    )}
                   </p>
                 </div>
                 <span className="text-sm font-semibold text-(--texto)">{MONEDA.format(v.total)}</span>

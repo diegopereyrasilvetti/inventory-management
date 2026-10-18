@@ -77,9 +77,9 @@ export default function MenuUsuario({ variante, abierto, alAlternar, nombre, rol
             </a>
           </li>
           <li role="none">
-            <a className={CLASE_ENLACE} href="#configuracion" role="menuitem">
+            <Link className={CLASE_ENLACE} to="/dashboard/configuracion" role="menuitem">
               <i className="fa-solid fa-gear w-4 text-center"></i> Configuración
-            </a>
+            </Link>
           </li>
           <li role="none" className="mt-1 border-t border-(--borde) pt-1">
             <button

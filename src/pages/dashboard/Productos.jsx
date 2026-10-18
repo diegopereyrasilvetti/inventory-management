@@ -1,6 +1,9 @@
 import { useRef, useState } from "react";
+import CargaCostos from "../../components/CargaCostos.jsx";
 import SeccionDashboard from "../../components/SeccionDashboard.jsx";
+import { discriminaIva, costosDeProducto } from "../../lib/impuestos.js";
 import { useCatalogo } from "../../store/catalogo.js";
+import { useConfiguracionFiscal } from "../../store/configuracionFiscal.js";
 import { useProveedores } from "../../store/proveedores.js";
 
 const CAMPOS_BUSQUEDA = ["nombre", "sku", "categoria", "marca", "modelo", "color", "serial", "proveedor"];
@@ -12,17 +15,22 @@ const DETALLES = [
   { clave: "serial", etiqueta: "Serial", fila: "row-start-7" },
   { clave: "proveedor", etiqueta: "Proveedor", fila: "row-start-8" },
   { clave: "precio", etiqueta: "Precio", fila: "row-start-9" },
+  { clave: "costo", etiqueta: "Costo", fila: "row-start-10" },
+  { clave: "alicuotaIva", etiqueta: "IVA", fila: "row-start-11" },
 ];
 const MONEDA = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS" });
 const FORM_VACIO = {
   nombre: "", sku: "", categoria: "", marca: "", modelo: "", color: "", serial: "", proveedor: "", precio: "",
-  stock: "0", minimo: "10",
+  alicuotaIva: "", costoConIva: "", stock: "0", minimo: "10",
 };
 const BASE_INPUT =
   "w-full rounded-lg border border-(--borde) bg-(--fondo) px-3 py-2.5 focus:outline-none focus:border-(--acento) focus:ring-2 focus:ring-(--acento)/30";
 const CLASE_INPUT = BASE_INPUT + " text-sm";
 const CLASE_INPUT_SKU = BASE_INPUT + " font-mono text-sm uppercase";
 const CLASE_INPUT_SERIAL = BASE_INPUT + " font-mono text-sm";
+
+const aTexto = (n) => String(n).replace(".", ",");
+const etiquetaAlicuota = (a) => (a === 0 ? "Exento (0 %)" : aTexto(a) + " %");
 
 function valoresUnicos(lista, campo) {
   const valores = [];
@@ -33,7 +41,9 @@ function valoresUnicos(lista, campo) {
 }
 
 export default function Productos() {
-  const { catalogo, cargando, agregar, actualizar, eliminar } = useCatalogo();
+  const { catalogo, cargando, agregar, actualizar, eliminar, cargarCostos, costosDisponibles } = useCatalogo();
+  const { config } = useConfiguracionFiscal();
+  const conIva = discriminaIva(config); // solo el Responsable Inscripto discrimina IVA
   const { proveedores } = useProveedores();
   const [busqueda, setBusqueda] = useState("");
   const [form, setForm] = useState(FORM_VACIO);
@@ -41,11 +51,23 @@ export default function Productos() {
   const [error, setError] = useState("");
   const dialogoRef = useRef(null);
   const nombreRef = useRef(null);
+  const dialogoCostosRef = useRef(null);
+
+  const [soloSinCosto, setSoloSinCosto] = useState(false);
+  const detalles = DETALLES.filter((d) => d.clave !== "alicuotaIva" || conIva);
+  const sinCosto = costosDisponibles ? catalogo.filter((p) => p.costoConIva === null) : [];
+  const sinCostoConStock = sinCosto.filter((p) => p.stock > 0).length;
 
   const q = busqueda.trim().toLowerCase();
-  const visibles = q
-    ? catalogo.filter((p) => CAMPOS_BUSQUEDA.some((c) => String(p[c] || "").toLowerCase().includes(q)))
-    : catalogo;
+  const visibles = catalogo
+    .filter((p) => !soloSinCosto || p.costoConIva === null)
+    .filter((p) => !q || CAMPOS_BUSQUEDA.some((c) => String(p[c] || "").toLowerCase().includes(q)));
+
+  // Vista previa del costo mientras se escribe en el formulario
+  const previaCosto = costosDeProducto(
+    { costoConIva: form.costoConIva, alicuota: form.alicuotaIva === "" ? null : Number(form.alicuotaIva) },
+    config,
+  );
 
   function campo(nombre) {
     return (e) => setForm((f) => ({ ...f, [nombre]: e.target.value }));
@@ -66,6 +88,8 @@ export default function Productos() {
             serial: producto.serial || "",
             proveedor: producto.proveedor || "",
             precio: typeof producto.precio === "number" ? producto.precio : "",
+            alicuotaIva: producto.alicuotaIva === null ? "" : String(producto.alicuotaIva),
+            costoConIva: producto.costoConIva === null ? "" : producto.costoConIva,
             stock: "0",
             minimo: "10",
           }
@@ -93,6 +117,11 @@ export default function Productos() {
       precio: parseFloat(form.precio),
     };
     if (!(datos.precio >= 0)) datos.precio = null;
+    // Costo vacío = desconocido (nunca cero). Si la base todavía no tiene las columnas de costo, no se envía nada
+    if (costosDisponibles) {
+      datos.alicuotaIva = form.alicuotaIva === "" ? null : Number(form.alicuotaIva);
+      datos.costoConIva = String(form.costoConIva).trim() === "" ? null : parseFloat(String(form.costoConIva).replace(",", "."));
+    }
     // Stock y mínimo solo se cargan al crear; después el stock se cambia desde Inventario
     if (!idEditado) {
       datos.stock = parseInt(form.stock, 10);
@@ -102,6 +131,8 @@ export default function Productos() {
     let mensaje = "";
     if (!datos.nombre || !datos.sku) {
       mensaje = "Completá el nombre y el SKU del producto.";
+    } else if (costosDisponibles && datos.costoConIva !== null && !(datos.costoConIva >= 0)) {
+      mensaje = "El costo tiene que ser un importe de 0 en adelante (o dejalo vacío si no lo sabés).";
     } else if (!idEditado && (!(datos.stock >= 0) || !(datos.minimo >= 0))) {
       mensaje = "El stock y el mínimo deben ser números de 0 en adelante.";
     } else if (catalogo.some((p) => p.sku === datos.sku && p.id !== idEditado)) {
@@ -149,8 +180,26 @@ export default function Productos() {
         </button>
       </div>
 
+      {sinCosto.length > 0 && (
+        <div className="mx-5 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-(--stock-bajo)/50 bg-(--fondo) px-4 py-3 sm:mx-6" role="status" data-aviso-costos>
+          <p className="min-w-0 flex-1 text-sm text-(--texto)">
+            <i className="fa-solid fa-triangle-exclamation mr-1.5 text-(--stock-bajo)" />
+            <strong>{sinCosto.length}</strong> {sinCosto.length === 1 ? "producto no tiene" : "productos no tienen"} costo cargado
+            {sinCostoConStock > 0 && <> ({sinCostoConStock} con stock)</>}. Mientras tanto, las ganancias que los usen se mostrarán como incompletas.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="rounded-full border border-(--borde) px-4 py-2 text-sm font-medium cursor-pointer hover:bg-(--superficie)" onClick={() => setSoloSinCosto((v) => !v)} aria-pressed={soloSinCosto}>
+              {soloSinCosto ? "Ver todos" : "Ver solo sin costo"}
+            </button>
+            <button type="button" className="rounded-full bg-(--acento-hover) px-4 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto)" onClick={() => dialogoCostosRef.current.showModal()}>
+              Cargar costos
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="mt-2 px-4 pb-3 sm:mt-3 sm:px-6 xl:overflow-x-auto">
-        <table className="block w-full border-collapse text-left xl:table xl:min-w-[58rem]">
+        <table className="block w-full border-collapse text-left xl:table xl:min-w-[66rem]">
           <thead className="hidden xl:table-header-group">
             <tr className="border-b border-(--borde) text-xs font-semibold uppercase tracking-wider text-(--texto-suave)">
               <th className="py-3 pr-4" scope="col">Producto</th>
@@ -162,6 +211,8 @@ export default function Productos() {
               <th className="py-3 pr-4" scope="col">Serial</th>
               <th className="py-3 pr-4" scope="col">Proveedor</th>
               <th className="py-3 pr-4" scope="col">Precio</th>
+              <th className="py-3 pr-4" scope="col">Costo</th>
+              {conIva && <th className="py-3 pr-4" scope="col">IVA</th>}
               <th className="py-3 w-20" scope="col"><span className="sr-only">Acciones</span></th>
             </tr>
           </thead>
@@ -173,19 +224,30 @@ export default function Productos() {
               >
                 <td className="col-start-1 row-start-1 min-w-0 font-semibold text-(--texto) [overflow-wrap:anywhere] xl:py-3.5 xl:pr-4 xl:font-medium">{p.nombre}</td>
                 <td className="col-span-2 row-start-2 min-w-0 font-mono text-sm text-(--texto-suave) [overflow-wrap:anywhere] xl:py-3.5 xl:pr-4 xl:whitespace-nowrap">{p.sku}</td>
-                {DETALLES.map((d) => {
+                {detalles.map((d) => {
                   let valor = p[d.clave];
                   if (d.clave === "precio") valor = typeof valor === "number" ? MONEDA.format(valor) : "";
+                  if (d.clave === "costo") {
+                    valor =
+                      p.costoConIva === null ? (
+                        <span className="rounded-full bg-(--viz-naranja-fondo) px-2.5 py-0.5 text-xs font-semibold text-(--viz-naranja-texto)">Sin costo</span>
+                      ) : (
+                        MONEDA.format(p.costoConIva)
+                      );
+                  }
+                  if (d.clave === "alicuotaIva") {
+                    valor = etiquetaAlicuota(p.alicuotaIva ?? config.alicuotaIvaGeneral);
+                  }
                   return (
                     <td
                       key={d.clave}
                       className={
                         "col-span-2 " + d.fila + " flex items-baseline justify-between gap-3 text-sm text-(--texto) xl:table-cell xl:py-3.5 xl:pr-4" +
-                        (d.clave === "serial" || d.clave === "precio" ? " xl:whitespace-nowrap" : "")
+                        (["serial", "precio", "costo", "alicuotaIva"].includes(d.clave) ? " xl:whitespace-nowrap" : "")
                       }
                     >
                       <span className="text-xs font-semibold uppercase tracking-wider text-(--texto-suave) xl:hidden">{d.etiqueta}</span>
-                      <span className={"min-w-0 [overflow-wrap:anywhere] " + (d.clave === "serial" ? "font-mono" : d.clave === "precio" ? "font-semibold" : "")}>
+                      <span className={"min-w-0 [overflow-wrap:anywhere] " + (d.clave === "serial" ? "font-mono" : (d.clave === "precio" || d.clave === "costo") ? "font-semibold" : "")}>
                         {valor || "—"}
                       </span>
                     </td>
@@ -273,6 +335,32 @@ export default function Productos() {
               <label className="text-sm font-medium" htmlFor="prod-precio">Precio ($)</label>
               <input className={CLASE_INPUT} id="prod-precio" type="number" min="0" step="0.01" inputMode="decimal" placeholder="0,00" value={form.precio} onChange={campo("precio")} />
             </div>
+            {costosDisponibles && (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium" htmlFor="prod-costo">Costo de compra por unidad ($)</label>
+                  <input className={CLASE_INPUT} id="prod-costo" type="number" min="0" step="0.01" inputMode="decimal" placeholder="Vacío = no lo sé" value={form.costoConIva} onChange={campo("costoConIva")} />
+                </div>
+                {conIva && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-medium" htmlFor="prod-iva">Alícuota de IVA</label>
+                    <select className={CLASE_INPUT} id="prod-iva" value={form.alicuotaIva} onChange={campo("alicuotaIva")}>
+                      <option value="">General ({aTexto(config.alicuotaIvaGeneral)} %)</option>
+                      {config.alicuotasIva.map((a) => (
+                        <option key={a} value={a}>{etiquetaAlicuota(a)}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                <p className="text-xs text-(--texto-suave) sm:col-span-2" data-ayuda-costo>
+                  {previaCosto.costo === null
+                    ? "Escribí lo que pagaste por unidad, con el IVA incluido. Si no lo sabés, dejalo vacío: el producto quedará con costo pendiente (no se toma como cero)."
+                    : conIva && previaCosto.costo !== previaCosto.costoConIva
+                      ? "Costo sin IVA: " + MONEDA.format(previaCosto.costo) + ". El IVA de la compra se descuenta como crédito fiscal."
+                      : "Con tu condición fiscal, el IVA de la compra forma parte del costo: se registra " + MONEDA.format(previaCosto.costo) + "."}
+                </p>
+              </>
+            )}
             {!idEditado && (
               <>
                 <div className="flex flex-col gap-1.5">
@@ -294,6 +382,7 @@ export default function Productos() {
           </div>
         </form>
       </dialog>
+      <CargaCostos dialogoRef={dialogoCostosRef} productos={catalogo} config={config} alGuardar={cargarCostos} />
     </SeccionDashboard>
   );
 }
