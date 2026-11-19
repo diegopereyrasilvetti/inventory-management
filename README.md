@@ -111,15 +111,15 @@ Errores: `400` datos inválidos, `401` sin sesión, `403` sin permiso u origen n
 
 ## Puesta en marcha
 
-Requisitos: Node.js 22 o superior y un proyecto de Supabase.
+Requisitos: Node.js 22 o superior, [Yarn](https://classic.yarnpkg.com/) 1.x y un proyecto de Supabase. El proyecto usa solo Yarn: no uses npm ni pnpm.
 
 ### 1. Instalar
 
 ```
-npm install
+yarn install
 ```
 
-Instala la web y la API juntas (la carpeta `server/` es parte del mismo proyecto).
+Instala la web y la API juntas (la carpeta `server/` es un *workspace* del mismo proyecto, por eso el `package.json` de la raíz es `private`). Genera un único `yarn.lock` en la raíz.
 
 ### 2. Base de datos
 
@@ -178,13 +178,13 @@ Se necesitan **dos terminales**:
 ```
 # Terminal 1: la API (http://localhost:3001)
 cd server
-npm run dev
+yarn dev
 
 # Terminal 2: la web (http://localhost:5173)
-npm run dev
+yarn dev
 ```
 
-La web reenvía las llamadas a `/api` hacia la API automáticamente. Para generar la versión de producción de la web: `npm run build`.
+La web reenvía las llamadas a `/api` hacia la API automáticamente. Para generar la versión de producción de la web: `yarn build`.
 
 ## Publicar en Vercel
 
