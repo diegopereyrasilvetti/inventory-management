@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { LOGO, Marca } from "../components/Logo.jsx";
+import ToggleTema from "../components/ToggleTema.jsx";
 import useTitulo from "../hooks/useTitulo.js";
 
 const CLASE_INPUT =
@@ -8,8 +9,8 @@ const CLASE_INPUT =
 const CLASE_ENLACE_MENU =
   "block px-4 py-3 rounded-lg text-(--texto) hover:bg-(--fondo) hover:text-(--acento-hover)";
 const CLASE_SOCIAL =
-  "flex size-8 text-sm items-center justify-center rounded-full border border-[#e8dcc8]/25 text-[#e8dcc8] transition hover:bg-(--acento) hover:border-(--acento) hover:text-white hover:-translate-y-0.5";
-const CLASE_LEGAL = "text-[#e8dcc8]/80 hover:text-white transition-colors";
+  "flex size-8 text-sm items-center justify-center rounded-full border border-(--pie-texto)/25 text-(--pie-texto) transition hover:bg-(--acento) hover:border-(--acento) hover:text-white hover:-translate-y-0.5";
+const CLASE_LEGAL = "text-(--pie-texto)/80 hover:text-white transition-colors";
 const CLASE_PARRAFO =
   "max-w-2xl mx-auto text-base sm:text-[1.05rem] lg:text-lg leading-[1.8] text-(--texto-suave) text-center text-balance";
 
@@ -55,8 +56,9 @@ export default function Home() {
               <Marca />
             </h1>
           </div>
+          <ToggleTema className="ml-auto" />
           <button
-            className="ml-auto text-2xl text-(--texto) cursor-pointer px-2 py-1 rounded-lg hover:bg-(--fondo)"
+            className="ml-1 text-2xl text-(--texto) cursor-pointer px-2 py-1 rounded-lg hover:bg-(--fondo)"
             type="button"
             aria-label={menuAbierto ? "Cerrar menú" : "Abrir menú"}
             aria-expanded={menuAbierto}
@@ -82,7 +84,7 @@ export default function Home() {
         </p>
         <div className="mt-8 flex justify-center">
           <Link
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-(--acento-hover) text-white text-base sm:text-lg font-semibold shadow-[0_8px_20px_rgba(143,95,53,0.3)] transition hover:bg-(--texto) hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-(--boton) text-white text-base sm:text-lg font-semibold shadow-[0_8px_20px_rgba(143,95,53,0.3)] transition hover:bg-(--boton-hover) hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
             to="/login"
           >
             Empezá a gestionar tu stock <i className="fa-solid fa-arrow-right text-sm"></i>
@@ -116,7 +118,7 @@ export default function Home() {
               <textarea className={CLASE_INPUT + " resize-y"} id="mensaje" name="mensaje" rows={5} placeholder="Contanos en qué te podemos ayudar" required></textarea>
             </div>
             <button
-              className="mt-2 inline-flex items-center justify-center gap-2 px-7 py-3 text-sm rounded-full md:col-span-2 md:justify-self-center md:px-14 sm:text-base bg-(--acento-hover) text-white font-semibold cursor-pointer transition hover:bg-(--texto) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
+              className="mt-2 inline-flex items-center justify-center gap-2 px-7 py-3 text-sm rounded-full md:col-span-2 md:justify-self-center md:px-14 sm:text-base bg-(--boton) text-white font-semibold cursor-pointer transition hover:bg-(--boton-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
               type="submit"
             >
               Enviar mensaje <i className="fa-solid fa-paper-plane text-sm"></i>
@@ -125,14 +127,14 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="bg-(--texto) text-[#e8dcc8]">
+      <footer className="bg-(--pie) text-(--pie-texto)">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-5 grid gap-6 text-center md:grid-cols-3 md:text-left">
           <div className="flex flex-col items-center gap-2 md:items-start">
             <a className="flex items-center gap-2.5" href="#inicio" aria-label="Gestión de Stock">
               <img className="block h-7 w-auto" src={LOGO} alt="" />
               <Marca azul="text-[#4d9bff]" className="text-lg font-semibold tracking-[0.02em] text-white" />
             </a>
-            <p className="text-sm leading-relaxed text-[#e8dcc8]/70 max-w-xs">
+            <p className="text-sm leading-relaxed text-(--pie-texto)/70 max-w-xs">
               Organizá el stock de tu emprendimiento de forma simple y rápida.
             </p>
           </div>
@@ -158,10 +160,10 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="border-t border-[#e8dcc8]/15">
+        <div className="border-t border-(--pie-texto)/15">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex flex-col-reverse items-center gap-3 sm:flex-row sm:justify-between">
-            <p className="text-xs text-[#e8dcc8]/70 text-center">© 2026 Gestión de Stock. Todos los derechos reservados.</p>
-            <a className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-[#e8dcc8]/10 text-[#e8dcc8] transition hover:bg-(--acento) hover:text-white" href="#inicio">
+            <p className="text-xs text-(--pie-texto)/70 text-center">© 2026 Gestión de Stock. Todos los derechos reservados.</p>
+            <a className="inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-(--pie-texto)/10 text-(--pie-texto) transition hover:bg-(--acento) hover:text-white" href="#inicio">
               <i className="fa-solid fa-arrow-up"></i> Volver arriba
             </a>
           </div>

@@ -301,7 +301,7 @@ export default function Ventas() {
 
           <button
             id="vta-registrar"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-(--acento-hover) px-6 py-3 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--texto) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover) disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-(--acento-hover)"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-(--boton) px-6 py-3 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--boton-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover) disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-(--boton)"
             type="submit"
             disabled={carrito.length === 0}
           >

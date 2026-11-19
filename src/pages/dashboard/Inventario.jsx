@@ -181,7 +181,7 @@ export default function Inventario() {
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-(--borde) px-5 py-4 sm:px-6">
         <button
-          className="inline-flex items-center gap-2 rounded-full bg-(--acento-hover) px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--texto) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
+          className="inline-flex items-center gap-2 rounded-full bg-(--boton) px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--boton-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
           type="button"
           onClick={abrirDialogo}
         >
@@ -225,7 +225,7 @@ export default function Inventario() {
             <button className="rounded-full border border-(--borde) px-5 py-2 text-sm font-medium cursor-pointer hover:bg-(--fondo)" type="button" onClick={() => dialogo.current.close()}>
               Cancelar
             </button>
-            <button className="rounded-full bg-(--acento-hover) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto)" type="submit">
+            <button className="rounded-full bg-(--boton) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--boton-hover)" type="submit">
               Guardar
             </button>
           </div>

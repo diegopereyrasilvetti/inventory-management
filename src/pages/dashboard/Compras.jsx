@@ -58,7 +58,7 @@ export default function Compras() {
         </div>
         <button
           id="compras-nueva"
-          className="inline-flex items-center gap-2 rounded-full bg-(--acento-hover) px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--texto) disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-full bg-(--boton) px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--boton-hover) disabled:cursor-not-allowed disabled:opacity-50"
           type="button"
           disabled={!disponible}
           onClick={() => setNueva(true)}

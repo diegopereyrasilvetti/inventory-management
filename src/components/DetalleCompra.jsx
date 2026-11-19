@@ -187,7 +187,7 @@ export default function DetalleCompra({ compra, alCerrar, acciones, config }) {
                 <label className="text-xs font-medium text-(--texto-suave)" htmlFor="pago-fecha">Fecha</label>
                 <input id="pago-fecha" className={CLASE_INPUT} type="date" min={compra.fecha} value={fecha} onChange={(e) => setFecha(e.target.value)} />
               </div>
-              <button type="submit" className="rounded-full bg-(--acento-hover) px-4 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto) disabled:opacity-60" disabled={ocupado}>Registrar pago</button>
+              <button type="submit" className="rounded-full bg-(--boton) px-4 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--boton-hover) disabled:opacity-60" disabled={ocupado}>Registrar pago</button>
             </form>
           )}
 
@@ -204,7 +204,7 @@ export default function DetalleCompra({ compra, alCerrar, acciones, config }) {
               <input id="anular-motivo" className={CLASE_INPUT} type="text" maxLength={200} autoComplete="off" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
               <div className="flex justify-end gap-2">
                 <button type="button" className="rounded-full border border-(--borde) px-4 py-1.5 text-sm font-medium cursor-pointer hover:bg-(--superficie)" onClick={() => { setAccion(null); setError(""); }}>Volver</button>
-                <button type="submit" className="rounded-full bg-(--stock-agotado) px-4 py-1.5 text-sm font-semibold text-white cursor-pointer hover:opacity-90 disabled:opacity-60" disabled={ocupado}>
+                <button type="submit" className="rounded-full bg-(--alerta-fondo) px-4 py-1.5 text-sm font-semibold text-white cursor-pointer hover:opacity-90 disabled:opacity-60" disabled={ocupado}>
                   {accion.tipo === "compra" ? "Anular compra" : "Anular pago"}
                 </button>
               </div>

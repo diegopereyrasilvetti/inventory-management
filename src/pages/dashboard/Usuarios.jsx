@@ -139,7 +139,7 @@ export default function Usuarios() {
           <p className="mt-0.5 text-sm text-(--texto-suave)">Quiénes pueden entrar al panel y con qué rol.</p>
         </div>
         <button
-          className="inline-flex items-center gap-2 rounded-full bg-(--acento-hover) px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--texto)"
+          className="inline-flex items-center gap-2 rounded-full bg-(--boton) px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--boton-hover)"
           type="button"
           onClick={abrirCrear}
         >
@@ -167,7 +167,7 @@ export default function Usuarios() {
           {usuarios.map((p) => (
             <li key={p.id} className="flex flex-wrap items-center gap-3 py-3.5">
               <span
-                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-(--acento-hover) text-sm font-semibold text-white"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-(--boton) text-sm font-semibold text-white"
                 aria-hidden="true"
               >
                 {(p.nombre || p.email || "?").charAt(0).toUpperCase()}
@@ -234,7 +234,7 @@ export default function Usuarios() {
           {errorCrear && <p className="text-sm text-(--stock-agotado)" role="alert">{errorCrear}</p>}
           <div className="flex justify-end gap-2">
             <button className="rounded-full border border-(--borde) px-5 py-2 text-sm font-medium cursor-pointer hover:bg-(--fondo)" type="button" onClick={() => dialogoCrear.current.close()}>Cancelar</button>
-            <button className="rounded-full bg-(--acento-hover) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto) disabled:opacity-60" type="submit" disabled={trabajando}>
+            <button className="rounded-full bg-(--boton) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--boton-hover) disabled:opacity-60" type="submit" disabled={trabajando}>
               {trabajando ? "Creando…" : "Crear cuenta"}
             </button>
           </div>
@@ -264,7 +264,7 @@ export default function Usuarios() {
           {errorEditar && <p className="text-sm text-(--stock-agotado)" role="alert">{errorEditar}</p>}
           <div className="flex justify-end gap-2">
             <button className="rounded-full border border-(--borde) px-5 py-2 text-sm font-medium cursor-pointer hover:bg-(--fondo)" type="button" onClick={() => dialogoEditar.current.close()}>Cancelar</button>
-            <button className="rounded-full bg-(--acento-hover) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto) disabled:opacity-60" type="submit" disabled={trabajando}>
+            <button className="rounded-full bg-(--boton) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--boton-hover) disabled:opacity-60" type="submit" disabled={trabajando}>
               {trabajando ? "Guardando…" : "Guardar"}
             </button>
           </div>
@@ -287,7 +287,7 @@ export default function Usuarios() {
           {errorPassword && <p className="text-sm text-(--stock-agotado)" role="alert">{errorPassword}</p>}
           <div className="flex justify-end gap-2">
             <button className="rounded-full border border-(--borde) px-5 py-2 text-sm font-medium cursor-pointer hover:bg-(--fondo)" type="button" onClick={() => dialogoPassword.current.close()}>Cancelar</button>
-            <button className="rounded-full bg-(--acento-hover) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto) disabled:opacity-60" type="submit" disabled={trabajando}>
+            <button className="rounded-full bg-(--boton) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--boton-hover) disabled:opacity-60" type="submit" disabled={trabajando}>
               {trabajando ? "Guardando…" : "Cambiar contraseña"}
             </button>
           </div>

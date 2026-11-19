@@ -30,7 +30,7 @@ export default function Documentacion() {
           <p className="mt-0.5 text-sm text-(--texto-suave)">Documentos y comprobantes</p>
         </div>
         <button
-          className="inline-flex items-center gap-2 rounded-full bg-(--acento-hover) px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--texto) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
+          className="inline-flex items-center gap-2 rounded-full bg-(--boton) px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--boton-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
           type="button"
           onClick={mostrarAviso}
         >

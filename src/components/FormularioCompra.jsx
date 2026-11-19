@@ -292,7 +292,7 @@ export default function FormularioCompra({ abierto, alCerrar, productos, proveed
         {error && <p className="text-sm text-(--stock-agotado)" role="alert">{error}</p>}
         <div className="flex justify-end gap-2">
           <button className="rounded-full border border-(--borde) px-5 py-2 text-sm font-medium cursor-pointer hover:bg-(--fondo)" type="button" onClick={alCerrar}>Cancelar</button>
-          <button id="cmp-registrar" className="rounded-full bg-(--acento-hover) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto) disabled:cursor-wait disabled:opacity-60" type="submit" disabled={enviando}>
+          <button id="cmp-registrar" className="rounded-full bg-(--boton) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--boton-hover) disabled:cursor-wait disabled:opacity-60" type="submit" disabled={enviando}>
             {enviando ? "Registrando…" : "Registrar compra"}
           </button>
         </div>
