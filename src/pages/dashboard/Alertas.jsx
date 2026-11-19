@@ -5,7 +5,7 @@ import { useCatalogo } from '../../store/catalogo.js';
 import { useProveedores } from '../../store/proveedores.js';
 
 const CLASES_BOTON = 'inline-flex items-center gap-1.5 rounded-full border border-(--borde) px-3.5 py-2 text-sm font-medium text-(--texto) transition hover:border-(--acento) hover:text-(--acento-hover)';
-const CLASES_FILTRO = 'rounded-full border border-(--borde) bg-(--superficie) px-4 py-2 text-sm font-medium text-(--texto) cursor-pointer transition hover:border-(--acento) aria-pressed:border-(--acento-hover) aria-pressed:bg-(--acento-hover) aria-pressed:text-white';
+const CLASES_FILTRO = 'rounded-full border border-(--borde) bg-(--superficie) px-4 py-2 text-sm font-medium text-(--texto) cursor-pointer transition hover:border-(--acento) aria-pressed:border-(--acento-hover) aria-pressed:bg-(--boton) aria-pressed:text-white';
 const CLASES_OK = 'mt-4 rounded-lg border border-(--viz-verde)/40 bg-(--viz-verde-fondo) px-4 py-2.5 text-sm text-(--viz-verde-texto)';
 const CLASES_ERROR = 'mt-4 rounded-lg border border-(--viz-naranja)/40 bg-(--viz-naranja-fondo) px-4 py-2.5 text-sm text-(--viz-naranja-texto)';
 
@@ -77,7 +77,7 @@ function AlertasTarjeta({ p, catalogo, proveedores, onReponer }) {
             onChange={(e) => setCantidad(e.target.value)}
           />
           <button
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-(--acento-hover) px-4 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--texto) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-(--boton) px-4 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--boton-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
             type="submit"
           >
             <i className="fa-solid fa-plus text-[11px]" /> Reponer

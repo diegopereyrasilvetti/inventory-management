@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import ToggleTema from "./ToggleTema.jsx";
 
 const CLASE_ENLACE =
   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-(--texto) hover:bg-(--fondo) hover:text-(--acento-hover)";
@@ -24,7 +25,7 @@ export default function MenuUsuario({ variante, abierto, alAlternar, nombre, rol
         onClick={alAlternar}
       >
         <span
-          className="flex size-8 shrink-0 items-center justify-center rounded-full bg-(--acento-hover) text-xs font-semibold text-white"
+          className="flex size-8 shrink-0 items-center justify-center rounded-full bg-(--boton) text-xs font-semibold text-white"
           aria-hidden="true"
         >
           {nombre.charAt(0).toUpperCase() || "U"}
@@ -80,6 +81,9 @@ export default function MenuUsuario({ variante, abierto, alAlternar, nombre, rol
             <Link className={CLASE_ENLACE} to="/dashboard/configuracion" role="menuitem">
               <i className="fa-solid fa-gear w-4 text-center"></i> Configuración
             </Link>
+          </li>
+          <li role="none">
+            <ToggleTema conTexto className={CLASE_ENLACE + " w-full"} />
           </li>
           <li role="none" className="mt-1 border-t border-(--borde) pt-1">
             <button

@@ -154,7 +154,7 @@ export default function Crecimiento() {
             : 'Estás viendo tus datos reales. Las ramas de productos se comparan con la medición de días anteriores.'}
         </p>
         <button
-          className="rounded-full border border-current/40 px-4 py-2 text-xs font-semibold cursor-pointer transition hover:bg-black/5"
+          className="rounded-full border border-current/40 px-4 py-2 text-xs font-semibold cursor-pointer transition hover:bg-(--fondo)"
           type="button"
           onClick={() => setForzarEjemplo(!ejemplo)}
         >

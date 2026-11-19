@@ -287,7 +287,7 @@ export default function ConfiguracionFiscal() {
             <button type="button" className="rounded-full border border-(--borde) px-4 py-2 text-sm font-semibold cursor-pointer hover:bg-(--fondo)" onClick={() => dialogoActivar.current?.close()}>
               Cancelar
             </button>
-            <button type="submit" className="rounded-full bg-(--acento-hover) px-4 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto) disabled:cursor-not-allowed disabled:opacity-50" disabled={palabra.trim().toUpperCase() !== PALABRA_ACTIVAR}>
+            <button type="submit" className="rounded-full bg-(--boton) px-4 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--boton-hover) disabled:cursor-not-allowed disabled:opacity-50" disabled={palabra.trim().toUpperCase() !== PALABRA_ACTIVAR}>
               Activar
             </button>
           </div>

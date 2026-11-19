@@ -22,8 +22,8 @@ const SECCIONES = [
 const CLASE_BUSCADOR =
   "text-sm rounded-lg bg-(--fondo) border border-(--borde) text-(--texto) placeholder:text-(--texto-suave)/60 focus:outline-none focus:border-(--acento) focus:ring-2 focus:ring-(--acento)/30";
 const CLASE_SOCIAL =
-  "flex size-7 items-center justify-center rounded-full border border-[#e8dcc8]/25 text-xs text-[#e8dcc8] transition hover:bg-(--acento) hover:border-(--acento) hover:text-white";
-const CLASE_LEGAL = "text-[#e8dcc8]/80 hover:text-white transition-colors";
+  "flex size-7 items-center justify-center rounded-full border border-(--pie-texto)/25 text-xs text-(--pie-texto) transition hover:bg-(--acento) hover:border-(--acento) hover:text-white";
+const CLASE_LEGAL = "text-(--pie-texto)/80 hover:text-white transition-colors";
 
 function claseEnlaceNav(base) {
   return ({ isActive }) =>
@@ -139,7 +139,7 @@ export default function DashboardLayout() {
             >
               <i className="fa-solid fa-bell"></i>
               {alertas > 0 && (
-                <span className="absolute right-1.5 top-1.5 flex size-4 items-center justify-center rounded-full bg-(--stock-agotado) text-[10px] font-bold leading-none text-white">
+                <span className="absolute right-1.5 top-1.5 flex size-4 items-center justify-center rounded-full bg-(--alerta-fondo) text-[10px] font-bold leading-none text-white">
                   {alertas}
                 </span>
               )}
@@ -192,7 +192,7 @@ export default function DashboardLayout() {
         <Outlet />
       </main>
 
-      <footer className="bg-(--texto) text-[#e8dcc8]">
+      <footer className="bg-(--pie) text-(--pie-texto)">
         <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3 sm:px-6">
           <a className="order-1 flex items-center gap-2" href="#inicio" aria-label="Gestión de Stock">
             <img className="block h-6 w-auto" src={LOGO} alt="" />
@@ -216,10 +216,10 @@ export default function DashboardLayout() {
           </ul>
         </div>
 
-        <div className="border-t border-[#e8dcc8]/15">
+        <div className="border-t border-(--pie-texto)/15">
           <div className="max-w-5xl mx-auto flex items-center justify-between gap-3 px-4 py-2 sm:px-6">
-            <p className="text-[11px] text-[#e8dcc8]/70">© 2026 Gestión de Stock. Todos los derechos reservados.</p>
-            <a className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#e8dcc8]/10 px-2.5 py-1 text-[11px] text-[#e8dcc8] transition hover:bg-(--acento) hover:text-white" href="#inicio">
+            <p className="text-[11px] text-(--pie-texto)/70">© 2026 Gestión de Stock. Todos los derechos reservados.</p>
+            <a className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-(--pie-texto)/10 px-2.5 py-1 text-[11px] text-(--pie-texto) transition hover:bg-(--acento) hover:text-white" href="#inicio">
               <i className="fa-solid fa-arrow-up"></i> Volver arriba
             </a>
           </div>

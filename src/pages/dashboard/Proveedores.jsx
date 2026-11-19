@@ -33,7 +33,7 @@ function ProveedoresDato({ etiqueta, valor, enlace, textoEnlace, icono }) {
         <span className="min-w-0 break-words text-sm font-medium text-(--texto)">{valor || "No cargado"}</span>
         {valor && enlace && (
           <a
-            className="inline-flex items-center gap-1.5 rounded-full bg-(--acento-hover) px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-(--texto)"
+            className="inline-flex items-center gap-1.5 rounded-full bg-(--boton) px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-(--boton-hover)"
             href={enlace}
           >
             <i className={icono + " text-[10px]"} />
@@ -148,7 +148,7 @@ export default function Proveedores() {
           </p>
         </div>
         <button
-          className="inline-flex items-center gap-2 rounded-full bg-(--acento-hover) px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--texto) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
+          className="inline-flex items-center gap-2 rounded-full bg-(--boton) px-5 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--boton-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
           type="button"
           onClick={() => abrirFormulario(null)}
         >
@@ -317,7 +317,7 @@ export default function Proveedores() {
             )}
             <div className="ml-auto flex gap-2">
               <button className="rounded-full border border-(--borde) px-5 py-2 text-sm font-medium cursor-pointer hover:bg-(--fondo)" type="button" onClick={() => dialogoRef.current.close()}>Cancelar</button>
-              <button className="rounded-full bg-(--acento-hover) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto)" type="submit">Guardar</button>
+              <button className="rounded-full bg-(--boton) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--boton-hover)" type="submit">Guardar</button>
             </div>
           </div>
         </form>
@@ -359,7 +359,7 @@ export default function Proveedores() {
           </dl>
           <div className="flex justify-end gap-2 pt-1">
             <button className="rounded-full border border-(--borde) px-5 py-2 text-sm font-medium cursor-pointer hover:bg-(--fondo)" type="button" onClick={() => dialogoVerRef.current.close()}>Cerrar</button>
-            <button className="rounded-full bg-(--acento-hover) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto)" type="button" onClick={editarDesdeDetalle}>Editar</button>
+            <button className="rounded-full bg-(--boton) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--boton-hover)" type="button" onClick={editarDesdeDetalle}>Editar</button>
           </div>
         </div>
       </dialog>

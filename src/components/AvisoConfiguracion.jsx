@@ -9,11 +9,11 @@ export default function AvisoConfiguracion() {
       role="alert"
     >
       <strong className="font-semibold">Falta configurar Supabase.</strong> Copiá{" "}
-      <code className="rounded bg-white/60 px-1">.env.example</code> como{" "}
-      <code className="rounded bg-white/60 px-1">.env</code>, completá{" "}
-      <code className="rounded bg-white/60 px-1">VITE_SUPABASE_URL</code> y{" "}
-      <code className="rounded bg-white/60 px-1">VITE_SUPABASE_ANON_KEY</code> y reiniciá{" "}
-      <code className="rounded bg-white/60 px-1">npm run dev</code>. Mientras tanto, el inicio de sesión no funciona.
+      <code className="rounded bg-(--superficie) px-1">.env.example</code> como{" "}
+      <code className="rounded bg-(--superficie) px-1">.env</code>, completá{" "}
+      <code className="rounded bg-(--superficie) px-1">VITE_SUPABASE_URL</code> y{" "}
+      <code className="rounded bg-(--superficie) px-1">VITE_SUPABASE_ANON_KEY</code> y reiniciá{" "}
+      <code className="rounded bg-(--superficie) px-1">npm run dev</code>. Mientras tanto, el inicio de sesión no funciona.
     </div>
   );
 }

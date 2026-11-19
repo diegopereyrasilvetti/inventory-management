@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+    color-scheme: light;
     --fondo: #faf6ef;
     --superficie: #ffffff;
     --borde: #e8dcc8;
@@ -11,6 +12,15 @@
     --stock-ok: #6b8f5e;
     --stock-bajo: #d49a3a;
     --stock-agotado: #b5503c;
+
+    /* Rellenos con texto blanco encima: botones, insignias de alerta */
+    --boton: #8f5f35;
+    --boton-hover: #3b2a20;
+    --alerta-fondo: #b5503c;
+
+    /* Pie de página: oscuro en ambos temas */
+    --pie: #3b2a20;
+    --pie-texto: #e8dcc8;
 
     /* Paleta de datos: gráficos, valores, estados y alertas */
     --viz-violeta: #6d5df0;
@@ -24,6 +34,41 @@
     --viz-gris: #7e80a8;
     --viz-gris-fondo: #e9eaf8;
     --viz-gris-texto: #4a4c78;
+}
+
+/* Tema oscuro: se activa con data-theme="dark" (elección de la persona) */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --fondo: #1c1713;
+    --superficie: #262019;
+    --borde: #4a3f33;
+    --acento: #b07a4a;
+    --acento: #bd8553;
+    --acento-hover: #e0b88a;
+    --texto: #f1e6d6;
+    --texto-suave: #b8a592;
+    --stock-ok: #8fb67f;
+    --stock-bajo: #e3b05a;
+    --stock-agotado: #ec8a74;
+
+    --boton: #8f5f35;
+    --boton-hover: #744b27;
+    --alerta-fondo: #b5503c;
+
+    --pie: #120e0b;
+    --pie-texto: #e8dcc8;
+
+    --viz-violeta: #9a8cff;
+    --viz-azul: #8ba3ff;
+    --viz-verde: #5fd69a;
+    --viz-verde-fondo: #1d3a2b;
+    --viz-verde-texto: #7fe0ae;
+    --viz-naranja: #ff9d6b;
+    --viz-naranja-fondo: #4a2a18;
+    --viz-naranja-texto: #ffb48a;
+    --viz-gris: #a3a5cc;
+    --viz-gris-fondo: #34354f;
+    --viz-gris-texto: #c4c6ea;
 }
 
 html {

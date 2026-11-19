@@ -24,7 +24,7 @@ export default class ErrorBoundary extends Component {
           {String(this.state.error?.stack || this.state.error)}
         </pre>
         <button
-          className="mt-4 rounded-full bg-(--acento-hover) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto)"
+          className="mt-4 rounded-full bg-(--boton) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--boton-hover)"
           type="button"
           onClick={() => window.location.reload()}
         >

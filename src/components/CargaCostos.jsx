@@ -98,7 +98,7 @@ export default function CargaCostos({ dialogoRef, productos, config, alGuardar }
             Cerrar
           </button>
           {pendientes.length > 0 && (
-            <button className="rounded-full bg-(--acento-hover) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--texto) disabled:cursor-wait disabled:opacity-60" type="submit" disabled={enviando}>
+            <button className="rounded-full bg-(--boton) px-5 py-2 text-sm font-semibold text-white cursor-pointer hover:bg-(--boton-hover) disabled:cursor-wait disabled:opacity-60" type="submit" disabled={enviando}>
               {enviando ? "Guardando…" : "Guardar costos"}
             </button>
           )}

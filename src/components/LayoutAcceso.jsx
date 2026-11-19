@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import ToggleTema from "./ToggleTema.jsx";
 import { LOGO, Marca } from "./Logo.jsx";
 
 /** Marco común de las pantallas de acceso (login, registro, recuperar contraseña): encabezado, tarjeta y pie. */
@@ -11,12 +12,15 @@ export default function LayoutAcceso({ titulo, subtitulo, children }) {
             <img className="block h-9 sm:h-11 w-auto" src={LOGO} alt="Logo de Gestión De Stock" />
             <Marca className="text-2xl sm:text-3xl font-extrabold tracking-[0.02em] text-(--texto)" />
           </Link>
+          <div className="flex items-center gap-2">
+          <ToggleTema />
           <Link
             className="inline-flex items-center gap-2 text-sm px-4 py-2 rounded-full border border-(--borde) text-(--texto) transition hover:bg-(--fondo) hover:text-(--acento-hover)"
             to="/"
           >
             <i className="fa-solid fa-arrow-left text-xs"></i> Volver al inicio
           </Link>
+          </div>
         </nav>
       </header>
 
@@ -28,7 +32,7 @@ export default function LayoutAcceso({ titulo, subtitulo, children }) {
         </section>
       </main>
 
-      <footer className="bg-(--texto) text-[#e8dcc8]/70">
+      <footer className="bg-(--pie) text-(--pie-texto)/70">
         <p className="px-4 py-4 text-xs text-center">© 2026 Gestión de Stock. Todos los derechos reservados.</p>
       </footer>
     </div>
@@ -39,4 +43,4 @@ export const CLASE_INPUT_ACCESO =
   "w-full px-3.5 py-2.5 text-sm rounded-lg bg-(--fondo) border border-(--borde) text-(--texto) placeholder:text-(--texto-suave)/60 focus:outline-none focus:border-(--acento) focus:ring-2 focus:ring-(--acento)/30";
 
 export const CLASE_BOTON_ACCESO =
-  "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-(--acento-hover) text-white font-semibold cursor-pointer transition hover:bg-(--texto) disabled:cursor-wait disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)";
+  "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-(--boton) text-white font-semibold cursor-pointer transition hover:bg-(--boton-hover) disabled:cursor-wait disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)";

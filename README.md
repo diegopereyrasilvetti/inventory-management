@@ -220,3 +220,7 @@ Como `SUPABASE_SERVICE_ROLE_KEY` está solo en Production, las versiones de prue
 ## Diseño
 
 Responsive (celular, tablet y escritorio), con paleta clara en tonos crema, marrón y blanco. En celular y tablet, el nombre de la persona y su menú de opciones quedan centrados en el encabezado, separados de la hamburguesa.
+
+## Modo oscuro
+
+Hay modo claro y oscuro. Por defecto sigue la preferencia del sistema y la persona puede cambiarlo desde el menú de usuario (o el encabezado de inicio y acceso); la elección se recuerda en el navegador. Detalles en [docs/modo-oscuro.md](docs/modo-oscuro.md).

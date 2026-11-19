@@ -300,7 +300,7 @@ export default function Balances() {
         </p>
         <button
           id="bal-modo"
-          className="rounded-full border border-current/40 px-4 py-2 text-xs font-semibold cursor-pointer transition hover:bg-black/5"
+          className="rounded-full border border-current/40 px-4 py-2 text-xs font-semibold cursor-pointer transition hover:bg-(--fondo)"
           type="button"
           onClick={() => setForzarEjemplo(!ejemplo)}
         >
@@ -502,7 +502,7 @@ export default function Balances() {
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
             <button
-              className="inline-flex items-center gap-2 rounded-full bg-(--acento-hover) px-6 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--texto) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
+              className="inline-flex items-center gap-2 rounded-full bg-(--boton) px-6 py-2.5 text-sm font-semibold text-white cursor-pointer transition hover:bg-(--boton-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--acento-hover)"
               type="submit"
             >
               <i className="fa-solid fa-plus text-xs" /> Registrar gasto
